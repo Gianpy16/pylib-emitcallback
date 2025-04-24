@@ -6,7 +6,7 @@
 EvEmit Documentation
 ====================
 
-.. automodule:: pylib_evemit
+.. automodule:: emitcallback
 	:no-index:
 
 .. toctree::

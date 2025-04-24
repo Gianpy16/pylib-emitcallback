@@ -46,7 +46,7 @@ omit = [
 ]
 
 [tool.coverage.paths]
-pylib_evemit = ["src/emitcallback", "*/pylib-evemit/src/emitcallback"]
+emitcallback = ["src/emitcallback", "*/pylib-evemit/src/emitcallback"]
 tests = ["tests", "*/pylib-evemit/tests"]
 
 [tool.coverage.report]

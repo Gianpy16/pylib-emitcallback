@@ -12,12 +12,12 @@ Releases of this library have been published to PyPi package manager.
 ## Install
 
 See here to install using pip:
-- https://pypi.org/project/pylib-evemit/
+- x
 
 ## Documentation
 
 See the docs about the contents and example.
-- https://pylib-evemit.readthedocs.io/en/latest
+- x
 
 ## Build - Weel package with Hatch
 

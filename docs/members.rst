@@ -2,7 +2,7 @@
 Members Reference
 =================
 
-.. automodule:: pylib_evemit
+.. automodule:: emitcallback
 
 .. hint::
 	All classes supports being copied with Python's :py:mod:`copy` module.
@@ -17,7 +17,7 @@ Other useful pages in this documentation:
 
 ______
 
-.. currentmodule:: pylib_evemit
+.. currentmodule:: emitcallback
 
 .. autoclass:: Single
 .. autoclass:: Signal
