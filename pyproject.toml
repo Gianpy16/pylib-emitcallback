@@ -23,9 +23,9 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Documentation = "https://example.com"
-Issues = "https://example.com"
-Source = "https://example.com"
+Documentation = "https://pylib-emitcallback.readthedocs.io/en/latest/"
+Issues = "https://github.com/Gianpy16/pylib-emitcallback/issues"
+Source = "https://github.com/Gianpy16/pylib-emitcallback"
 
 [tool.hatch.version]
 path = "src/emitcallback/__about__.py"

@@ -17,7 +17,7 @@ See here to install using pip:
 ## Documentation
 
 See the docs about the contents and example.
-- x
+- https://pylib-emitcallback.readthedocs.io/en/latest/
 
 ## Build - Weel package with Hatch
 
