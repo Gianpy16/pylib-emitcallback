@@ -1,9 +1,9 @@
 
-import emitcallback as evemit
+import emitcallback
 
 def test_basic() -> None:
 	
-	s = evemit.Signal[[]]()
+	s = emitcallback.Signal[[]]()
 
 	s.connect(lambda: print("Helllo World!"))
 	s.emit()

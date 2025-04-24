@@ -1,4 +1,4 @@
-""" 📶 Python Library EvEmit (Event Emitter)
+""" 📶 Python Library - emitcallback (Emit Callback)
 
 Python library that implements callable collectors to call to react on an event.
 

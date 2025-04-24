@@ -9,7 +9,7 @@
 import os, sys
 sys.path.insert(0, os.path.abspath(os.path.join("..", "src")))
 
-project = 'EvEmit Documentation'
+project = 'Emit Callback Documentation'
 copyright = '2025, Gianpiero Maggiulli'
 author = 'Gianpiero Maggiulli'
 
