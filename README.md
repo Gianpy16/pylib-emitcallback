@@ -12,7 +12,7 @@ Releases of this library have been published to PyPi package manager.
 ## Install
 
 See here to install using pip:
-- x
+- https://pypi.org/project/emitcallback/
 
 ## Documentation
 
