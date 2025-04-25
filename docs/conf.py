@@ -25,7 +25,7 @@ add_module_names = False
 
 autodoc_default_options = {
     'members': True,
-    'undoc-members': True,
+	'show-inheritance': True,
 }
 
 templates_path = ['_templates']

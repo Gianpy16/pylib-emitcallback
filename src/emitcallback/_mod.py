@@ -5,7 +5,7 @@ from typing import Any, Callable
 
 type CallbackType[**P, R] = Callable[P, R] | WeakMethod[Callable[P, R]]
 
-def weakify[**P, R](
+def _weakify[**P, R](
 	callback: Callable[P, R],
 	weakdead: Callable[[WeakMethod[Callable[P, R]]], None]
 	) -> CallbackType[P, R]:
@@ -14,7 +14,7 @@ def weakify[**P, R](
 		WeakMethod(callback, weakdead) if ismethod(callback) \
 		else callback
 
-def unweak[**P, R](callback: CallbackType[P, R]) -> Callable[P, R]:
+def _unweak[**P, R](callback: CallbackType[P, R]) -> Callable[P, R]:
 
 	return callback() if isinstance(callback, WeakMethod) else callback # type: ignore
 
@@ -36,7 +36,7 @@ class Single[**P]:
 		self.__flags: int = flags
 		self.__connection: CallbackType[P, Any] | None = None \
 			if callback is None else \
-				weakify(callback, self.__weakconnect_dead__) if (flags & SINGLE_NO_WEAK) == 0 \
+				_weakify(callback, self.__weakconnect_dead__) if (flags & SINGLE_NO_WEAK) == 0 \
 				else callback
 
 	def __weakconnect_dead__(self, ref: WeakMethod[Callable[P, Any]]) -> None:
@@ -52,13 +52,13 @@ class Single[**P]:
 		"""
 
 		self.__flags = flags
-		self.__connection = weakify(callback, self.__weakconnect_dead__) \
+		self.__connection = _weakify(callback, self.__weakconnect_dead__) \
 			if (flags & SINGLE_NO_WEAK) == 0 else callback
 
 	def disconnect(self, callback: Callable[P, Any]) -> None:
 		""" removes the current connection if the callable matches. """
 		
-		if not self.__connection is None and unweak(callback) == self.__connection:
+		if not self.__connection is None and _unweak(callback) == self.__connection:
 			self.__connection = None
 
 	def disconnect_any(self) -> None:
@@ -69,7 +69,7 @@ class Single[**P]:
 	def is_connected(self, callback: Callable[P, Any]) -> bool:
 		""" checks if the current connection matches the callable. """
 
-		return unweak(callback) == callback
+		return _unweak(callback) == callback
 
 	def is_connected_any(self) -> bool:
 		""" checks if there's is a connection with a callable. """
@@ -91,7 +91,7 @@ class Single[**P]:
 		if self.__connection is None:
 			return
 		
-		callback = unweak(self.__connection)
+		callback = _unweak(self.__connection)
 
 		if (self.__flags & SINGLE_ONE_SHOT) != 0:
 			self.__connection = None
@@ -103,7 +103,7 @@ class Single[**P]:
 	def copy(self) -> Single[P]:
 		""" creates a new instance of this object with a copy of the current connection. """
 
-		return Single(unweak(self.__connection) \
+		return Single(_unweak(self.__connection) \
 			if not self.__connection is None else None, self.__flags)
 
 	__copy__ = copy
@@ -123,7 +123,7 @@ class Queue[**P]:
 
 	def __connect__(self, callback: Callable[P, Any], noweak: bool) -> tuple[CallbackType[P, Any], bool]:
 
-		return (weakify(callback, self.__weakconnect_dead__) \
+		return (_weakify(callback, self.__weakconnect_dead__) \
 			if not noweak else callback, noweak, )
 
 	def connect(self, callback: Callable[P, Any], *, noweak: bool = False) -> None:
@@ -148,12 +148,12 @@ class Queue[**P]:
 		will do nothing if the callable wasn't connected.
 		"""
 
-		self.__connections[:] = filter(lambda c: unweak(c[0]) == callback, self.__connections)
+		self.__connections[:] = filter(lambda c: _unweak(c[0]) == callback, self.__connections)
 
 	def disconnect_each(self, *callbacks: Callable[P, Any]) -> None:
 		""" same as :func:`disconnect` but disconnects multiple callbacks at once. """
 
-		self.__connections[:] = filter(lambda c: unweak(c[0]) in callbacks, self.__connections)
+		self.__connections[:] = filter(lambda c: _unweak(c[0]) in callbacks, self.__connections)
 
 	def disconnect_all(self) -> None:
 		""" disconnects all callables from this queue immediatly. """
@@ -164,7 +164,7 @@ class Queue[**P]:
 		""" checks if the callable has at least one connection in this queue. """
 
 		return not next((c for c in self.__connections \
-			if unweak(c[0]) == callback), None) is None
+			if _unweak(c[0]) == callback), None) is None
 
 	__contains__ = is_connected
 
@@ -184,7 +184,7 @@ class Queue[**P]:
 		if len(self.__connections) == 0:
 			return False
 
-		(unweak(self.__connections.pop(0)[0]))(*args, **kwargs)
+		(_unweak(self.__connections.pop(0)[0]))(*args, **kwargs)
 		return True
 
 	__call__ = emit
@@ -193,14 +193,14 @@ class Queue[**P]:
 		""" copies and appends each connections from another queue into this one. """
 
 		self.__connections.extend(\
-			map(lambda c: self.__connect__(unweak(c[0]), c[1]), other.__connections))
+			map(lambda c: self.__connect__(_unweak(c[0]), c[1]), other.__connections))
 
 	def copy(self) -> Queue[P]:
 		""" creates a new queue with a copy of all connections from this queue. """
 
 		queue: Queue[P] = Queue()
 		queue.__connections.extend(\
-			map(lambda c: self.__connect__(unweak(c[0]), c[1]), self.__connections))
+			map(lambda c: self.__connect__(_unweak(c[0]), c[1]), self.__connections))
 
 		return queue
 
@@ -229,7 +229,7 @@ class Signal[**P]:
 
 	def __connect__(self, callback: Callable[P, Any], flags: int = 0) -> tuple[CallbackType[P, Any], int]:
 
-		return (weakify(callback, self.__weakconnect_dead__) \
+		return (_weakify(callback, self.__weakconnect_dead__) \
 			if (flags & SIGNAL_NO_WEAK) != 0 else callback, flags, )
 
 	def connect(self, callback: Callable[P, Any], flags: int = 0) -> None:
@@ -240,7 +240,7 @@ class Signal[**P]:
 		"""
 
 		if (flags & SIGNAL_MULTI_CONNECT) == 0 \
-			and not next((c for c in self.__connections if unweak(c[0]) == callback), None) is None:
+			and not next((c for c in self.__connections if _unweak(c[0]) == callback), None) is None:
 
 			raise AlreadyConnectedException()
 		
@@ -255,7 +255,7 @@ class Signal[**P]:
 		"""
 
 		if (flags & SIGNAL_MULTI_CONNECT) == 0 \
-			and not next(filter(lambda c: unweak(c[0]) in callbacks, self.__connections), None) is None:
+			and not next(filter(lambda c: _unweak(c[0]) in callbacks, self.__connections), None) is None:
 
 			raise AlreadyConnectedException()
 
@@ -266,12 +266,12 @@ class Signal[**P]:
 		anything if the callable isn't connected.
 		"""
 
-		self.__connections[:] = filter(lambda c: unweak(c[0]) == callback, self.__connections)
+		self.__connections[:] = filter(lambda c: _unweak(c[0]) == callback, self.__connections)
 
 	def disconnect_each(self, *callbacks: Callable[P, Any]) -> None:
 		""" same as :func:`disconnect` but disconnects multiple callbacks at once. """
 
-		self.__connections[:] = filter(lambda c: unweak(c[0]) in callbacks, self.__connections)
+		self.__connections[:] = filter(lambda c: _unweak(c[0]) in callbacks, self.__connections)
 
 	def disconnect_all(self) -> None:
 		""" disconnects all callables immediatly. """
@@ -282,7 +282,7 @@ class Signal[**P]:
 		""" checks if the callable has at least connection in this signal. """
 
 		return not next((c for c in self.__connections \
-			if unweak(c[0]) == callback), None) is None
+			if _unweak(c[0]) == callback), None) is None
 	
 	__contains__ = is_connected
 
@@ -314,7 +314,7 @@ class Signal[**P]:
 				del self.__connections[idx]
 			
 			try:
-				unweak(connection)(*args, **kwargs)
+				_unweak(connection)(*args, **kwargs)
 			except Exception as e:
 				exceptions.append(e)
 
@@ -333,10 +333,10 @@ class Signal[**P]:
 		in this signal whitout using the :const:`SIGNAL_MULTI_CONNECT` flag.
 		"""
 
-		callbacks = map(lambda c: unweak(c[0]), other.__connections)
+		callbacks = map(lambda c: _unweak(c[0]), other.__connections)
 
 		if not next(filter(lambda c: (c[1] & SIGNAL_MULTI_CONNECT) == 0 \
-			and unweak(c[0]) in callbacks, self.__connections), None) is None:
+			and _unweak(c[0]) in callbacks, self.__connections), None) is None:
 			# finds if there's at least one callback already connected in this signal that doesn't
 			# use the multi connect flag. just like in connect this should fail.
 
@@ -356,7 +356,7 @@ class Signal[**P]:
 		""" creates a new signal with a copy of all connections. """
 
 		signal: Signal[P] = Signal()
-		connections = map(lambda c: (weakify(unweak(c[0]), signal.__weakconnect_dead__), c[1], ), self.__connections)
+		connections = map(lambda c: (_weakify(_unweak(c[0]), signal.__weakconnect_dead__), c[1], ), self.__connections)
 
 		signal.__connections.extend(connections)
 

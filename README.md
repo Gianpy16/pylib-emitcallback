@@ -28,3 +28,13 @@ Run the following:
 ```
 python -m hatch build
 ```
+
+## Build - Sphinx documentation
+
+Dependencies: [Sphinx](https://www.sphinx-doc.org/en/master/index.html), [Python's Doc Theme](https://pypi.org/project/python-docs-theme/)
+
+Run the following:
+
+```
+sphinx-build -M html ./docs/ ./build --fail-on-warning -a
+```
